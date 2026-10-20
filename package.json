@@ -1,0 +1,28 @@
+{
+  "name": "cryptnote",
+  "version": "1.0.0",
+  "description": "CryptNote - Password Protected Personal Diary",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/siyath-stack/CryptNote.git"
+  },
+  "keywords": [],
+  "author": "Siyath de Silva, Abdulfatah Hassan, Cecil Smith",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/siyath-stack/CryptNote/issues"
+  },
+  "homepage": "https://github.com/siyath-stack/CryptNote#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.5"
+  }
+}
