@@ -1,21 +1,50 @@
-// server.js - CryptNote Backend Server
+// server.js - CryptNote Backend Server with Local JSON Persistence
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+const DATA_FILE = path.join(__dirname, 'entries.json');
 
-// Middleware to parse JSON data and serve static files from /public
+// Middleware
 app.use(express.json());
 app.use(express.static('public'));
 
-// Master password and server-side storage for diary entries
 const MASTER_PASSWORD = "mysecretpassword";
-let diaryEntries = [
-  {
-    id: 1,
-    timestamp: "2026-10-20 09:00 AM",
-    content: "Welcome to CryptNote! Your diary entries are stored securely on the server."
+
+// Helper function: Load entries from entries.json (or initialize default if file doesn't exist)
+function loadEntriesFromFile() {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const data = fs.readFileSync(DATA_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (err) {
+    console.error("Error reading entries file:", err);
   }
-];
+  
+  // Default entry if file is missing/new
+  return [
+    {
+      id: 1,
+      timestamp: "2026-10-20 09:00",
+      content: "Welcome to CryptNote! Your diary entries are now permanently saved to file."
+    }
+  ];
+}
+
+// Helper function: Save entries array to entries.json
+function saveEntriesToFile(entries) {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(entries, null, 2), 'utf8');
+  } catch (err) {
+    console.error("Error saving entries to file:", err);
+  }
+}
+
+// Load saved entries on server start
+let diaryEntries = loadEntriesFromFile();
 
 // Helper function to format entry timestamps
 function formatTimestamp(date = new Date()) {
@@ -32,7 +61,7 @@ app.post('/api/login', (req, res) => {
   }
 });
 
-// Route 2: Get diary entries (Server-side password check)
+// Route 2: Get diary entries
 app.get('/api/entries', (req, res) => {
   const { password } = req.headers;
   if (password === MASTER_PASSWORD) {
@@ -42,7 +71,7 @@ app.get('/api/entries', (req, res) => {
   }
 });
 
-// Route 3: Submit a new entry
+// Route 3: Submit a new entry and persist it to entries.json
 app.post('/api/entries', (req, res) => {
   const { password, content } = req.body;
   if (password !== MASTER_PASSWORD) {
@@ -59,6 +88,8 @@ app.post('/api/entries', (req, res) => {
   };
 
   diaryEntries.unshift(newEntry);
+  saveEntriesToFile(diaryEntries); // Save permanently to JSON file
+
   res.json({ success: true, entry: newEntry });
 });
 
