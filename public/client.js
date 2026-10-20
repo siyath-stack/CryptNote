@@ -1,87 +1,118 @@
-// public/client.js - CryptNote Frontend Logic
-\$(document).ready(function () {
+// public/client.js - Connects directly to server.js
+document.addEventListener("DOMContentLoaded", function () {
   let currentPassword = "";
 
-  // 1. Handle Unlock Button Click
-  \$("#unlock-btn").click(function () {
-    const passwordInput = \$("#master-password").val();
+  const unlockBtn = document.getElementById("unlock-btn");
+  const masterPasswordInput = document.getElementById("master-password");
+  const loginScreen = document.getElementById("login-screen");
+  const dashboardScreen = document.getElementById("dashboard-screen");
+  const errorAlert = document.getElementById("error-alert");
+  const dismissAlertBtn = document.getElementById("dismiss-alert-btn");
+  const tryAgainBtn = document.getElementById("try-again-btn");
+  const closeModalX = document.getElementById("close-modal-x");
+  const entriesDisplay = document.getElementById("entries-display");
+  const submitEntryBtn = document.getElementById("submit-entry-btn");
+  const entryText = document.getElementById("entry-text");
+  const lockBtn = document.getElementById("lock-btn");
+  const entryCountLabel = document.getElementById("entry-count");
 
-    \$.ajax({
-      url: "/api/login",
+  // 1. Handle Unlock
+  unlockBtn.addEventListener("click", performLogin);
+
+  function performLogin() {
+    const passwordInput = masterPasswordInput.value;
+
+    fetch("/api/login", {
       method: "POST",
-      contentType: "application/json",
-      data: JSON.stringify({ password: passwordInput }),
-      success: function (response) {
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: passwordInput })
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("Access Denied");
+        return response.json();
+      })
+      .then(data => {
         currentPassword = passwordInput;
-        \$("#error-alert").addClass("hidden");
-        \$("#login-screen").addClass("hidden");
-        \$("#dashboard-screen").removeClass("hidden");
+        errorAlert.classList.add("hidden");
+        loginScreen.classList.add("hidden");
+        dashboardScreen.classList.remove("hidden");
         loadEntries();
-      },
-      error: function () {
-        \$("#error-alert").removeClass("hidden");
-      }
-    });
-  });
+      })
+      .catch(err => {
+        errorAlert.classList.remove("hidden");
+      });
+  }
 
-  // 2. Hide Error Alert
-  \$("#dismiss-alert-btn").click(function () {
-    \$("#error-alert").addClass("hidden");
-    \$("#master-password").val("").focus();
-  });
+  // 2. Hide Modal Handlers
+  function hideModal() {
+    errorAlert.classList.add("hidden");
+    masterPasswordInput.value = "";
+    masterPasswordInput.focus();
+  }
 
-  // 3. Load Diary Entries from Backend Server
+  dismissAlertBtn.addEventListener("click", hideModal);
+  tryAgainBtn.addEventListener("click", hideModal);
+  closeModalX.addEventListener("click", hideModal);
+
+  // 3. Load Entries & Update Entry Counter
   function loadEntries() {
-    \$.ajax({
-      url: "/api/entries",
+    fetch("/api/entries", {
       method: "GET",
-      headers: { password: currentPassword },
-      success: function (response) {
-        const display = \$("#entries-display").empty();
-        if (response.entries.length === 0) {
-          display.append('<p class="subtitle">No diary entries yet. Write your first note below!</p>');
+      headers: { "password": currentPassword }
+    })
+      .then(res => res.json())
+      .then(data => {
+        entriesDisplay.innerHTML = "";
+        const entries = data.entries || [];
+        
+        // Update 5 entries counter label from wireframe
+        entryCountLabel.textContent = `${entries.length} entries`;
+
+        if (entries.length === 0) {
+          entriesDisplay.innerHTML = '<div class="entry-card"><p>No entries yet. Write your first thought below!</p></div>';
         } else {
-          response.entries.forEach(entry => {
-            display.append(`
-              <div class="entry-card">
-                <span class="timestamp">${entry.timestamp}</span>
-                <p>${escapeHtml(entry.content)}</p>
-              </div>
-            `);
+          entries.forEach(entry => {
+            const card = document.createElement("div");
+            card.className = "entry-card";
+            card.innerHTML = `
+              <span class="timestamp">${escapeHtml(entry.timestamp)}</span>
+              <p>${escapeHtml(entry.content)}</p>
+            `;
+            entriesDisplay.appendChild(card);
           });
         }
-      }
-    });
+      });
   }
 
-  // Helper function to prevent HTML injection in entries
   function escapeHtml(text) {
-    return \$('<div>').text(text).html();
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
   }
 
-  // 4. Submit New Entry
-  \$("#submit-entry-btn").click(function () {
-    const contentText = \$("#entry-text").val();
+  // 4. Submit Entry
+  submitEntryBtn.addEventListener("click", function () {
+    const contentText = entryText.value;
     if (!contentText.trim()) return;
 
-    \$.ajax({
-      url: "/api/entries",
+    fetch("/api/entries", {
       method: "POST",
-      contentType: "application/json",
-      data: JSON.stringify({ password: currentPassword, content: contentText }),
-      success: function () {
-        \$("#entry-text").val("");
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: currentPassword, content: contentText })
+    })
+      .then(res => res.json())
+      .then(data => {
+        entryText.value = "";
         loadEntries();
-      }
-    });
+      });
   });
 
-  // 5. Lock Diary Functionality (Clears DOM data for privacy)
-  \$("#lock-btn").click(function () {
+  // 5. Lock Diary
+  lockBtn.addEventListener("click", function () {
     currentPassword = "";
-    \$("#master-password").val("");
-    \$("#entries-display").empty();
-    \$("#dashboard-screen").addClass("hidden");
-    \$("#login-screen").removeClass("hidden");
+    masterPasswordInput.value = "";
+    entriesDisplay.innerHTML = "";
+    dashboardScreen.classList.add("hidden");
+    loginScreen.classList.remove("hidden");
   });
 });

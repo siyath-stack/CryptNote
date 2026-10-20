@@ -5,62 +5,95 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CryptNote - Password Protected Personal Diary</title>
   <link rel="stylesheet" href="style.css">
-  <!-- jQuery Library -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
-  <!-- Screen 1: Login / Locked View -->
-  <div id="login-screen" class="container">
-    <div class="lock-icon">🔒</div>
-    <h1>CryptNote</h1>
-    <p class="subtitle">PRIVATE DIARY</p>
+  <!-- Wireframe Container -->
+  <div class="wireframe-frame">
 
-    <div class="form-group">
-      <label for="master-password">MASTER PASSWORD</label>
-      <input type="password" id="master-password" placeholder="Enter password...">
-      <button id="unlock-btn">UNLOCK DIARY</button>
-    </div>
+    <!-- Screen 1: Login / Locked View -->
+    <div id="login-screen" class="wireframe-screen">
+      <div class="address-bar">cryptnote.app</div>
+      <div class="screen-body center-content">
+        
+        <div class="padlock-box">🔒</div>
+        <h1 class="app-title">CryptNote</h1>
+        <p class="app-subtitle">PRIVATE DIARY</p>
 
-    <p id="status-text">Status: <strong>Locked</strong></p>
+        <hr class="wireframe-divider">
 
-    <!-- Screen 3: Error Alert Box -->
-    <div id="error-alert" class="alert hidden">
-      <div class="alert-content">
-        <h3>⚠️ Access Denied</h3>
-        <p>Incorrect password. Please try again.</p>
-        <button id="dismiss-alert-btn">Try Again</button>
+        <div class="form-group">
+          <label for="master-password">MASTER PASSWORD</label>
+          <div class="double-input-wrapper">
+            <input type="password" id="master-password" placeholder="••••••••••••">
+          </div>
+          <button id="unlock-btn" class="btn-primary">UNLOCK DIARY</button>
+        </div>
+
+        <hr class="wireframe-divider">
+
+        <p class="status-indicator">Status: <strong id="status-text">Locked</strong></p>
+
+        <!-- Screen 3: Error Alert Modal (Wireframe Alert Box) -->
+        <div id="error-alert" class="wireframe-modal hidden">
+          <div class="modal-header">
+            <span>ALERT</span>
+            <span id="close-modal-x" class="close-x">[ × ]</span>
+          </div>
+          <hr class="wireframe-divider-thin">
+          <div class="modal-body">
+            <h3>⚠️ Access Denied</h3>
+            <p>Incorrect password.</p>
+            <p>Please try again.</p>
+          </div>
+          <hr class="wireframe-divider-thin">
+          <div class="modal-actions">
+            <button id="dismiss-alert-btn" class="btn-secondary">Dismiss</button>
+            <button id="try-again-btn" class="btn-primary">Try Again</button>
+          </div>
+        </div>
+
       </div>
     </div>
+
+    <!-- Screen 2: Main Dashboard Unlocked View -->
+    <div id="dashboard-screen" class="wireframe-screen hidden">
+      <div class="address-bar flex-between">
+        <span>cryptnote.app/diary</span>
+        <span class="secure-tag">[Secure]</span>
+      </div>
+
+      <header class="dashboard-header">
+        <div class="brand-group">
+          <div class="padlock-box-small">🔒</div>
+          <h2 class="app-title-small">CryptNote</h2>
+        </div>
+        <div class="header-actions">
+          <span id="entry-count" class="entry-count-label">0 entries</span>
+          <button id="lock-btn" class="btn-dark-small">🔒 Lock</button>
+        </div>
+      </header>
+
+      <div class="dashboard-body">
+        <!-- Entries feed area -->
+        <div id="entries-display" class="entries-feed">
+          <!-- Dynamically populated entries -->
+        </div>
+
+        <!-- New Entry Box -->
+        <div class="new-entry-card">
+          <label for="entry-text" class="section-label">NEW ENTRY</label>
+          <textarea id="entry-text" rows="4" placeholder="Write your thoughts here..."></textarea>
+          <div class="new-entry-footer">
+            <span class="draft-indicator">Unsaved draft</span>
+            <button id="submit-entry-btn" class="btn-secondary-grey">SUBMIT ENTRY</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Screen 2: Unlocked Diary Dashboard -->
-  <div id="dashboard-screen" class="container hidden">
-    <header class="top-bar">
-      <div class="logo-area">
-        <span class="lock-icon-small">🔒</span>
-        <h2>CryptNote</h2>
-      </div>
-      <button id="lock-btn">🔒 Lock</button>
-    </header>
-
-    <!-- List of past diary entries -->
-    <div id="entries-display" class="entries-container">
-      <!-- Entries loaded dynamically via client.js -->
-    </div>
-
-    <!-- New entry input area -->
-    <div class="new-entry-box">
-      <label for="entry-text">NEW ENTRY</label>
-      <textarea id="entry-text" rows="4" placeholder="Write your thoughts here..."></textarea>
-      <div class="action-bar">
-        <span class="draft-status">Unsaved draft</span>
-        <button id="submit-entry-btn">SUBMIT ENTRY</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Client-side JavaScript -->
   <script src="client.js"></script>
 </body>
 </html>

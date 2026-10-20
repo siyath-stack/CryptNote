@@ -62,8 +62,10 @@ app.post('/api/entries', (req, res) => {
   res.json({ success: true, entry: newEntry });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+}
 
 module.exports = { formatTimestamp };
